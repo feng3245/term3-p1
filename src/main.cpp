@@ -1,3 +1,4 @@
+
 #include <fstream>
 #include <math.h>
 #include <uWS/uWS.h>
@@ -9,7 +10,8 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include "spline.h"
-
+#include "trajectory.h"
+#include "behavior.h"
 using namespace std;
 
 // for convenience
@@ -17,7 +19,7 @@ using json = nlohmann::json;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
-double deg2rad(double x) { return x * pi() / 180; }
+//double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 double lane = 1;
 double ref_vel = 0;
@@ -135,7 +137,8 @@ vector<double> getFrenet(double x, double y, double theta, const vector<double> 
 }
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
-vector<double> getXY(double s, double d, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y)
+
+/*vector<double> getXY(double s, double d, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y)
 {
 	int prev_wp = -1;
 
@@ -160,7 +163,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s, const vec
 
 	return {x,y};
 
-}
+}*/
 
 int main() {
   uWS::Hub h;
@@ -224,7 +227,7 @@ int main() {
           	double car_d = j[1]["d"];
           	double car_yaw = j[1]["yaw"];
           	double car_speed = j[1]["speed"];
-
+		auto our_car = vehicle(car_x, car_y, car_s, car_d, car_yaw, car_speed);
           	// Previous path data given to the Planner
           	auto previous_path_x = j[1]["previous_path_x"];
           	auto previous_path_y = j[1]["previous_path_y"];
@@ -239,12 +242,28 @@ int main() {
 
 if(prev_size > 0)
 {
-car_s = end_path_s;
+our_car.S = end_path_s;
 }
 bool too_close = false;
 
-//find ref_v to use
+
+vector<vehicle> other_cars = vector<vehicle>();
 for(int i = 0; i < sensor_fusion.size(); i++)
+{
+float d = sensor_fusion[i][6];
+double vx = sensor_fusion[i][3];
+double vy = sensor_fusion[i][4];
+double check_speed = sqrt(vx*vx + vy*vy);
+double check_car_s = sensor_fusion[i][5];
+        auto other_car = vehicle(0,0, check_car_s, d, 0, check_speed);
+other_cars.push_back(other_car);
+}
+behavior behave = behavior();
+vector<double> behave_vec = behave.getBehavior(prev_size, our_car, other_cars, ref_vel, lane);
+ref_vel = behave_vec[0];
+lane = behave_vec[1];
+//find ref_v to use
+/*for(int i = 0; i < sensor_fusion.size(); i++)
 {
 	//car is in my lane
 	float d = sensor_fusion[i][6];
@@ -254,9 +273,10 @@ for(int i = 0; i < sensor_fusion.size(); i++)
 	double vy = sensor_fusion[i][4];
 	double check_speed = sqrt(vx*vx + vy*vy);
 	double check_car_s = sensor_fusion[i][5];
-
-	check_car_s+=((double)prev_size*.02*check_speed);
-		if((check_car_s > car_s) && ((check_car_s - car_s) < 30))
+	
+	auto other_car = vehicle(0,0, check_car_s, d, 0, check_speed);
+	other_car.S+=((double)prev_size*.02*check_speed);
+		if((other_car.S > our_car.S) && ((other_car.S - our_car.S) < 30))
 		{
 			//ref_vel = check_speed*2.23694;
 			too_close = true;
@@ -275,27 +295,32 @@ else if(ref_vel < 49.5)
 {
 ref_vel += .224;
 }
+*/         	
+vector<double> next_x_vals;          	
+vector<double> next_y_vals;
+
 
 
           	json msgJson;
 
-vector<double> ptsx;
+/*vector<double> ptsx;
+
 vector<double> ptsy;
 
-double ref_x = car_x;
-double ref_y = car_y;
-double ref_yaw = deg2rad(car_yaw);
+double ref_x = our_car.X;
+double ref_y = our_car.Y;
+double ref_yaw = deg2rad(our_car.Yaw);
 
 if(prev_size < 2)
 {
-	double prev_car_x = car_x - cos(car_yaw);
-	double prev_car_y = car_y - sin(car_yaw);
+	double prev_car_x = our_car.X - cos(our_car.Yaw);
+	double prev_car_y = our_car.Y - sin(our_car.Yaw);
 
 	ptsx.push_back(prev_car_x);
-	ptsx.push_back(car_x);
+	ptsx.push_back(our_car.X);
 
 	ptsy.push_back(prev_car_y);
-	ptsy.push_back(car_y);
+	ptsy.push_back(our_car.Y);
 }
 else
 {
@@ -314,9 +339,9 @@ else
 }
 
 
-vector<double> next_wp0 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-vector<double> next_wp1 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-vector<double> next_wp2 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+vector<double> next_wp0 = getXY(our_car.S+30, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+vector<double> next_wp1 = getXY(our_car.S+60, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+vector<double> next_wp2 = getXY(our_car.S+90, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
 ptsx.push_back(next_wp0[0]);
 ptsx.push_back(next_wp1[0]);
@@ -337,10 +362,7 @@ for(int i = 0; i < ptsx.size(); i++)
 tk::spline s;
 
 s.set_points(ptsx, ptsy);
-          	vector<double> next_x_vals;
-          	vector<double> next_y_vals;
-
-for(int i = 0; i < previous_path_x.size(); i++)
+ for(int i = 0; i < previous_path_x.size(); i++)
 {
 	next_x_vals.push_back(previous_path_x[i]);
 	next_y_vals.push_back(previous_path_y[i]);
@@ -371,8 +393,11 @@ double dist_inc = 0.3;
 	
           next_x_vals.push_back(x_point);
           next_y_vals.push_back(y_point);
-prev_size = next_x_vals.size();
     }
+*/
+auto traject = trajectory();
+traject.get_trajectory(next_x_vals, next_y_vals,our_car, prev_size, previous_path_x, previous_path_y, lane, map_waypoints_s, map_waypoints_x, map_waypoints_y, ref_vel);
+prev_size = next_x_vals.size();
                msgJson["next_x"] = next_x_vals;
                msgJson["next_y"] = next_y_vals;
           	auto msg = "42[\"control\","+ msgJson.dump()+"]";

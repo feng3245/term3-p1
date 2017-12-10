@@ -772,6 +772,16 @@ lapacke_mangling.h
 
 /root/CarND-Path-Planning-Project/src/Eigen-3.3/Eigen/src/plugins/MatrixCwiseUnaryOps.h
 
+/root/CarND-Path-Planning-Project/src/behavior.cpp
+behavior.h
+/root/CarND-Path-Planning-Project/src/behavior.h
+
+/root/CarND-Path-Planning-Project/src/behavior.h
+vector
+-
+vehicle.h
+/root/CarND-Path-Planning-Project/src/vehicle.h
+
 /root/CarND-Path-Planning-Project/src/json.hpp
 algorithm
 -
@@ -851,6 +861,10 @@ json.hpp
 /root/CarND-Path-Planning-Project/src/json.hpp
 spline.h
 /root/CarND-Path-Planning-Project/src/spline.h
+trajectory.h
+/root/CarND-Path-Planning-Project/src/trajectory.h
+behavior.h
+/root/CarND-Path-Planning-Project/src/behavior.h
 
 /root/CarND-Path-Planning-Project/src/spline.h
 cstdio
@@ -861,4 +875,26 @@ vector
 -
 algorithm
 -
+
+/root/CarND-Path-Planning-Project/src/trajectory.cpp
+trajectory.h
+/root/CarND-Path-Planning-Project/src/trajectory.h
+math.h
+-
+spline.h
+/root/CarND-Path-Planning-Project/src/spline.h
+
+/root/CarND-Path-Planning-Project/src/trajectory.h
+vector
+-
+vehicle.h
+/root/CarND-Path-Planning-Project/src/vehicle.h
+spline.h
+/root/CarND-Path-Planning-Project/src/spline.h
+
+/root/CarND-Path-Planning-Project/src/vehicle.cpp
+vehicle.h
+/root/CarND-Path-Planning-Project/src/vehicle.h
+
+/root/CarND-Path-Planning-Project/src/vehicle.h
 

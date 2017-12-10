@@ -1,5 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/path_planning.dir/src/main.cpp.o"
+  "CMakeFiles/path_planning.dir/src/vehicle.cpp.o"
+  "CMakeFiles/path_planning.dir/src/trajectory.cpp.o"
+  "CMakeFiles/path_planning.dir/src/behavior.cpp.o"
   "path_planning.pdb"
   "path_planning"
 )
