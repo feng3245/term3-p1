@@ -1,0 +1,2 @@
+path generation is done by taking a spline of 3 segments of frenet coordinates at 30, 60 and 90 ahead. The lanes are determined by behaviour which takes into account of speed cost currently. If trajectory deems it's safe to change to the lane then the lane will be changed to the targeted lane and trajectory will be generated. Where being safe is determined by having a safe buffer between your car and surrounding cars and no cars a gaining or being much slower than your car in lane that is being changed to.
+
