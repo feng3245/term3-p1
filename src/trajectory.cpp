@@ -5,7 +5,7 @@
 using namespace std;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
-
+int current_lane = 1;
 trajectory::trajectory() {}
 vector<double> trajectory::getXY(double s, double d, const vector<double> &maps_s, const vector<double> &maps_x, const vector<double> &maps_y)
 {
@@ -35,6 +35,8 @@ vector<double> trajectory::getXY(double s, double d, const vector<double> &maps_
 }
 void trajectory::get_trajectory(std::vector<double>& next_x_vals, std::vector<double>& next_y_vals, vehicle our_car, int prev_size, vector<double> previous_path_x, vector<double> previous_path_y, int lane, vector<double> map_waypoints_s, vector<double> map_waypoints_x, vector<double> map_waypoints_y, double ref_vel)
 {
+//let this slide for now since sensor fusion is inside of behaviour
+bool is_safe = true;
 vector<double> ptsx;
 
 vector<double> ptsy;
@@ -69,8 +71,12 @@ else
         ptsy.push_back(ref_y_prev);
         ptsy.push_back(ref_y);
 }
+//Do safety checks, If not safe then lane is still same as existing lane
 
-
+if(!is_safe)
+{
+lane = current_lane;
+}
 vector<double> next_wp0 = getXY(our_car.S+30, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 vector<double> next_wp1 = getXY(our_car.S+60, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 vector<double> next_wp2 = getXY(our_car.S+90, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
