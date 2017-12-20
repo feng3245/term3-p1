@@ -5,9 +5,9 @@ behavior::behavior() {}
 double behavior::lanecost(double vel_veh_ahead)
 {
 //We assume lane cost is the speed going for the lane right now for simpllcity sake
-if(vel_veh_ahead>=49.5)
+if(vel_veh_ahead>=49.5/2.23694)
 return 0;
-return 0.8 *((49.5-vel_veh_ahead)/49.5);
+return 0.8 *((49.5/2.23694-vel_veh_ahead)/(49.5/2.23694));
 }
 vector<double> behavior::getBehavior(int prev_size, vehicle our_car, vector<vehicle> other_cars, double ref_vel, int lane)
 {
@@ -32,12 +32,21 @@ for(int i = 0; i < other_cars.size(); i++)
                         too_close = true;
 
 			//And is safe
+//}
+
+//                        if(lane>0)
+  //                      {
+    //                    lane = 0;
+      //                  }
+                }
+        }
+}
 double costoflane = 1;
 int bestlane = 0;
 for(int intendedlane = 0; intendedlane < 3; intendedlane++)
 {
 	
-double slowestVehicle = 49.5;
+double slowestVehicle = 49.5/2.23694;
 for(int i = 0; i < other_cars.size(); i++)
 {
 	float d = other_cars[i].D;		
@@ -99,18 +108,8 @@ for(int i = 0; i < other_cars.size(); i++)
 if(is_safe)
 {
 lane = intendedlane;
-break;
-
 }
-//}
 
-//                        if(lane>0)
-  //                      {
-    //                    lane = 0;
-      //                  }
-                }
-        }
-}
 if(too_close&&ref_vel>follow_speed)
 {
 ref_vel -= .30;
