@@ -1,7 +1,12 @@
 #include "behavior.h"
+#include <chrono>
+
+using namespace std::chrono;
 
 behavior::behavior() {}
 //slowest vehcile ahead is what matters
+double lastlaneswitch;
+double timesincestart = 0;
 double behavior::lanecost(double vel_veh_ahead)
 {
 //We assume lane cost is the speed going for the lane right now for simpllcity sake
@@ -26,18 +31,15 @@ for(int i = 0; i < other_cars.size(); i++)
 	auto other_car = other_cars[i];
        
         other_car.S+=((double)prev_size*.02*check_speed);
-                if((other_car.S > our_car.S) && ((other_car.S - our_car.S) < 45))
+                if((other_car.S > our_car.S)&&(other_car.S - our_car.S)<45)
                 {
-                        follow_speed = check_speed*2.23694;
+			//Set it to the slowest car in the vacinity not just the first car within 45s
+			if(check_speed*2.23694<follow_speed)
+			{
+                        	follow_speed = check_speed*2.23694;
+			}
                         too_close = true;
 
-			//And is safe
-//}
-
-//                        if(lane>0)
-  //                      {
-    //                    lane = 0;
-      //                  }
                 }
         }
 }
@@ -72,12 +74,16 @@ if(lanecosttemp < costoflane)
 }
 
 int intendedlane = lane;
+//switch lane at most once every second
+if(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()-lastlaneswitch>1000)
 if(bestlane>intendedlane)
 {
+lastlaneswitch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 intendedlane++;
 }	
 else if(bestlane<intendedlane)
 {
+lastlaneswitch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 intendedlane--;
 }		
 //for(int intendedlane = 0; intendedlane < 2; intendedlane++)
@@ -87,6 +93,15 @@ intendedlane--;
 //continue;
 
 bool is_safe = true;
+if(timesincestart == 0)
+{
+timesincestart = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+}
+//You need 15 seconds ramp up time
+if(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()-timesincestart<15000)
+is_safe = false;
+else
 for(int i = 0; i < other_cars.size(); i++)
 {
 	float d = other_cars[i].D;
